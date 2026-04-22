@@ -1,0 +1,14 @@
+mkdir -p .github/workflows && echo 'name: Build APK
+on: workflow_dispatch
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: subosito/flutter-action@v2
+    - run: flutter pub get
+    - run: flutter build apk
+    - uses: actions/upload-artifact@v4
+      with:
+        name: app.apk
+        path: build/app/outputs/flutter-apk/app-release.apk' > .github/workflows/build.yml && git add . && git commit -m "Add workflow" && git push
