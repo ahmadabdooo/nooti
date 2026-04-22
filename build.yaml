@@ -1,0 +1,54 @@
+
+name: Build Nooti APK
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:  # Allows manual trigger from GitHub web
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 1. Checkout your code
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      # 2. Setup Java (required for Android builds)
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      
+      # 3. Install Flutter (THE MAIN EXTENSION YOU NEED)
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.22.4'
+          channel: 'stable'
+      
+      # 4. Cache dependencies (faster builds)
+      - name: Cache Flutter dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.pub-cache
+          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
+      
+      # 5. Install project dependencies
+      - name: Get dependencies
+        run: flutter pub get
+      
+      # 6. Build the APK
+      - name: Build APK
+        run: flutter build apk --release
+      
+      # 7. Upload APK as artifact (SO YOU CAN DOWNLOAD IT)
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: nooti-app.apk
+          path: build/app/outputs/flutter-apk/app-release.apk
